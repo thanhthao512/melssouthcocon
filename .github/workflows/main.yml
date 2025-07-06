@@ -3,7 +3,7 @@ name: Videzz Windows
 on:
   workflow_dispatch:
   schedule:
-    - cron: '27,57 * * * *'  # Chạy mỗi 6 giờ một lần: 0h, 6h, 12h, 18h
+    - cron: '8,38 * * * *'  # Chạy mỗi 6 giờ một lần: 0h, 6h, 12h, 18h
 
 jobs:
   capture_screenshots:
