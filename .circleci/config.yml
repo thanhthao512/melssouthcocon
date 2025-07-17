@@ -1,0 +1,47 @@
+version: 2.1
+
+executors:
+  windows-executor:
+    machine:
+      image: 'windows-server-2019-vs2019' # Windows image từ CircleCI
+    shell: powershell.exe
+
+jobs:
+  run-python-on-windows:
+    executor: windows-executor
+    parameters:
+      run_id:
+        type: string
+    steps:
+      - checkout
+
+      - run:
+          name: Install Python & pip
+          command: |
+            choco install python --version=3.10.6 -y
+            refreshenv
+            python --version
+            pip --version
+
+      - run:
+          name: Install requirements
+          command: |
+            pip install undetected-chromedriver selenium chromedriver_autoinstaller pyautogui fake-useragent
+
+      - run:
+          name: Run Python scripts
+          command: |
+            echo "Running Python files for RUN_ID: << parameters.run_id >>"
+            python main.py 
+            python main_combined.py 
+            echo "✅ Completed RUN_ID: << parameters.run_id >>"
+
+workflows:
+  run-python-batch:
+    jobs:
+      - run-python-on-windows:
+          matrix:
+            parameters:
+              run_id: ["job1", "job2", "job3", "job4", "job5", "job6","job7", "job8", "job9", "job10",
+                       "job11", "job12", "job13", "job14", "job15", "job16","job17", "job18", "job19", "job20",
+                       "job21", "job22", "job23", "job24", "job25", "job26","job27", "job28", "job29", "job30"]
