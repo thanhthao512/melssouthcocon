@@ -1,4 +1,4 @@
-name: Matrix Pull and Run 4 Docker Images in Parallel
+name: Matrix Pull 3 Images and Run 6 Containers in Parallel
 
 on:
   workflow_dispatch:
@@ -8,28 +8,34 @@ on:
 jobs:
   run-matrix:
     runs-on: ubuntu-latest
+    timeout-minutes: 10  # ⏱ Giới hạn thời gian mỗi job
+
     strategy:
       matrix:
-        job_id: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+        job_id: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10,11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
 
     steps:
-      - name: Pull and run 4 Docker containers in parallel
+      - name: Pull 3 images
         run: |
-          echo "🧪 Job ${{ matrix.job_id }}: Starting..."
-
           echo "🐳 Pulling images..."
           docker pull nduythanh1/stream-app &
           docker pull nduythanh1/selenium-earnvids-app &
           docker pull nduythanh1/selenium-chrome-app &
           wait
 
-          echo "🚀 Running containers in parallel..."
-          docker run --rm --name stream-app-${{ matrix.job_id }} nduythanh1/stream-app &
+      - name: Run 6 containers (from 3 images)
+        run: |
+          echo "🚀 Running 6 containers in parallel..."
+          
+          docker run --rm --name stream-app-1-${{ matrix.job_id }} nduythanh1/stream-app &
+          docker run --rm --name stream-app-2-${{ matrix.job_id }} nduythanh1/stream-app &
 
-          docker run --rm --name selenium-earnvids-app-${{ matrix.job_id }} nduythanh1/selenium-earnvids-app &
+          docker run --rm --name selenium-earnvids-1-${{ matrix.job_id }} nduythanh1/selenium-earnvids-app &
+          docker run --rm --name selenium-earnvids-2-${{ matrix.job_id }} nduythanh1/selenium-earnvids-app &
 
-          docker run --rm --name selenium-chrome-app-${{ matrix.job_id }} nduythanh1/selenium-chrome-app &
+          docker run --rm --name selenium-chrome-1-${{ matrix.job_id }} nduythanh1/selenium-chrome-app &
+          docker run --rm --name selenium-chrome-2-${{ matrix.job_id }} nduythanh1/selenium-chrome-app &
 
-          wait  # ⏳ Đợi tất cả container chạy xong
+          wait
 
           echo "✅ Job ${{ matrix.job_id }} completed."
