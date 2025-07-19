@@ -3,9 +3,9 @@ name: Matrix Pull and Run 4 Docker Images in Parallel
 on:
   workflow_dispatch:
   push:
-    branches: [ "master" ]
+    branches: ["master" ]
   schedule:
-    - cron: '*/15 * * * *'
+    - cron: '6,21,36,51 * * * *'
 jobs:
   run-matrix:
     runs-on: ubuntu-latest
