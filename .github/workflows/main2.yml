@@ -1,9 +1,9 @@
-name: Matrix Pull and Run 8 Docker Containers (4 images × 2 containers)
+name: Matrix Pull and Run 8 Docker Images in Parallel
 
 on:
   workflow_dispatch:
   push:
-    branches: ["master"]
+    branches: [ "master" ]
   schedule:
     - cron: '11,26,41,56 * * * *'
 
@@ -13,42 +13,33 @@ jobs:
     timeout-minutes: 13
     strategy:
       matrix:
-        job_id: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-                 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+        job_id: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
 
     steps:
-      - name: Pull and run 8 Docker containers (4 images × 2)
+      - name: Pull and run 8 Docker containers in parallel
         run: |
           echo "🧪 Job ${{ matrix.job_id }}: Starting..."
 
-          echo "🐳 Pulling images once..."
-          for img in \
-            nduythanh1/stream-app \
-            nduythanh1/selenium-earnvids-app \
-            nduythanh1/selenium-chrome-app \
-            nduythanh1/dropmix-selenium
-          do
-            docker pull $img &
-          done
-          wait  # đợi pull xong
+          echo "🐳 Pulling images..."
+          docker pull nduythanh1/stream-app &
+          docker pull nduythanh1/selenium-earnvids-app &
+          docker pull nduythanh1/selenium-chrome-app &
+          docker pull nduythanh1/selenium-videozz-multiprocess &
+          wait
 
-          echo "🚀 Running 2 containers cho mỗi image..."
-          # Stream-app
-          docker run --rm --name stream-app-${{ matrix.job_id }}-1 nduythanh1/stream-app &
-          docker run --rm --name stream-app-${{ matrix.job_id }}-2 nduythanh1/stream-app &
+          echo "🚀 Running containers in parallel (2 of each image)..."
+          docker run --rm --name stream-app-1-${{ matrix.job_id }} nduythanh1/stream-app &
+          docker run --rm --name stream-app-2-${{ matrix.job_id }} nduythanh1/stream-app &
 
-          # Selenium-earnvids-app
-          docker run --rm --name selenium-earnvids-app-${{ matrix.job_id }}-1 nduythanh1/selenium-earnvids-app &
-          docker run --rm --name selenium-earnvids-app-${{ matrix.job_id }}-2 nduythanh1/selenium-earnvids-app &
+          docker run --rm --name selenium-earnvids-app-1-${{ matrix.job_id }} nduythanh1/selenium-earnvids-app &
+          docker run --rm --name selenium-earnvids-app-2-${{ matrix.job_id }} nduythanh1/selenium-earnvids-app &
 
-          # Selenium-chrome-app
-          docker run --rm --name selenium-chrome-app-${{ matrix.job_id }}-1 nduythanh1/selenium-chrome-app &
-          docker run --rm --name selenium-chrome-app-${{ matrix.job_id }}-2 nduythanh1/selenium-chrome-app &
+          docker run --rm --name selenium-chrome-app-1-${{ matrix.job_id }} nduythanh1/selenium-chrome-app &
+          docker run --rm --name selenium-chrome-app-2-${{ matrix.job_id }} nduythanh1/selenium-chrome-app &
 
-          # Dropmix-selenium
-          docker run --rm --name dropmix-selenium-${{ matrix.job_id }}-1 nduythanh1/dropmix-selenium &
-          docker run --rm --name dropmix-selenium-${{ matrix.job_id }}-2 nduythanh1/dropmix-selenium &
+          docker run --rm --name selenium-videozz-1-${{ matrix.job_id }} nduythanh1/selenium-videozz-multiprocess &
 
-          wait  # ⏳ chờ cả 8 container hoàn tất
-          
+
+          wait  # ⏳ Chờ tất cả container kết thúc
+
           echo "✅ Job ${{ matrix.job_id }} completed."
