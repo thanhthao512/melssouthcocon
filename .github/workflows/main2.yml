@@ -5,41 +5,45 @@ on:
   push:
     branches: [ "master" ]
   schedule:
-    - cron: '11,26,41,56 * * * *'
+    - cron: '11 * * * *'
 
 jobs:
   run-matrix:
     runs-on: ubuntu-latest
-    timeout-minutes: 13
+    timeout-minutes: 45
     strategy:
       matrix:
         job_id: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
 
     steps:
-      - name: Pull and run 8 Docker containers in parallel
+      - name: Pull and run 8 Docker containers in sequence (2 of each in parallel)
         run: |
           echo "🧪 Job ${{ matrix.job_id }}: Starting..."
 
           echo "🐳 Pulling images..."
-          docker pull nduythanh1/stream-app &
-          docker pull nduythanh1/selenium-earnvids-app &
-          docker pull nduythanh1/selenium-chrome-app &
-          docker pull nduythanh1/selenium-videozz-multiprocess &
+          docker pull nduythanh1/stream-app
+          docker pull nduythanh1/selenium-earnvids-app
+          docker pull nduythanh1/selenium-chrome-app
+          docker pull nduythanh1/selenium-videozz-multiprocess
+
+          echo "🚀 Running 2 stream-app containers (timeout 10m)..."
+          timeout 600 docker run --rm --name stream-app-1-${{ matrix.job_id }} nduythanh1/stream-app &
+          timeout 600 docker run --rm --name stream-app-2-${{ matrix.job_id }} nduythanh1/stream-app &
+          timeout 600 docker run --rm --name stream-app-3-${{ matrix.job_id }} nduythanh1/stream-app &
           wait
 
-          echo "🚀 Running containers in parallel (2 of each image)..."
-          docker run --rm --name stream-app-1-${{ matrix.job_id }} nduythanh1/stream-app &
-          docker run --rm --name stream-app-2-${{ matrix.job_id }} nduythanh1/stream-app &
+          echo "🚀 Running 2 selenium-earnvids-app containers (timeout 10m)..."
+          timeout 600 docker run --rm --name selenium-earnvids-app-1-${{ matrix.job_id }} nduythanh1/selenium-earnvids-app &
+          timeout 600 docker run --rm --name selenium-earnvids-app-2-${{ matrix.job_id }} nduythanh1/selenium-earnvids-app &
+          wait
 
-          docker run --rm --name selenium-earnvids-app-1-${{ matrix.job_id }} nduythanh1/selenium-earnvids-app &
-          docker run --rm --name selenium-earnvids-app-2-${{ matrix.job_id }} nduythanh1/selenium-earnvids-app &
+          echo "🚀 Running 2 selenium-chrome-app containers (timeout 10m)..."
+          timeout 600 docker run --rm --name selenium-chrome-app-1-${{ matrix.job_id }} nduythanh1/selenium-chrome-app &
+          timeout 600 docker run --rm --name selenium-chrome-app-2-${{ matrix.job_id }} nduythanh1/selenium-chrome-app &
+          wait
 
-          docker run --rm --name selenium-chrome-app-1-${{ matrix.job_id }} nduythanh1/selenium-chrome-app &
-          docker run --rm --name selenium-chrome-app-2-${{ matrix.job_id }} nduythanh1/selenium-chrome-app &
-
-          docker run --rm --name selenium-videozz-1-${{ matrix.job_id }} nduythanh1/selenium-videozz-multiprocess &
-
-
-          wait  # ⏳ Chờ tất cả container kết thúc
-
+          echo "🚀 Running 1 selenium-videozz-multiprocess container (timeout 10m)..."
+          timeout 600 docker run --rm --name selenium-videozz-1-${{ matrix.job_id }} nduythanh1/selenium-videozz-multiprocess
+          timeout 600 docker run --rm --name selenium-videozz-2-${{ matrix.job_id }} nduythanh1/selenium-videozz-multiproces
+          wait
           echo "✅ Job ${{ matrix.job_id }} completed."
